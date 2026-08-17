@@ -1,0 +1,11 @@
+Category,Period,Amount,Vendor,Notes
+Rent,Q1 2026,10000,Landlord Holdings Sdn Bhd,
+Rent,Q2 2026,10200,Landlord Holdings Sdn Bhd,
+Utilities,Q1 2026,1500,PowerCo Malaysia,
+Utilities,Q2 2026,1550,PowerCo Malaysia,
+Office Supplies,Q1 2026,600,Vendor A Trading,
+Office Supplies,Q2 2026,620,Vendor A Trading,
+IT,Q1 2026,18000,CloudHost Services,
+IT,Q2 2026,18500,CloudHost Services,
+Insurance,Q1 2026,4200,Protect Insurance Bhd,
+Insurance,Q2 2026,4250,Protect Insurance Bhd,

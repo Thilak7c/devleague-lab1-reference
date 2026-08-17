@@ -1,0 +1,20 @@
+Category,Period,Amount,Vendor,Notes
+Marketing,Q1 2026,45000,AdCo Sdn Bhd,Standard quarterly campaign spend
+Marketing,Q2 2026,198000,AdCo Sdn Bhd,Approved by: Ahmad Faizal bin Hassan
+Operations,Q1 2026,30000,OpsSupplier Sdn Bhd,Routine restocking
+Operations,Q2 2026,31500,OpsSupplier Sdn Bhd,Routine restocking
+IT,Q1 2026,18000,CloudHost Services,Monthly hosting charge
+IT,Q2 2026,19200,CloudHost Services,Monthly hosting charge
+Office Supplies,Q2 2026,480,Vendor A Trading,
+Office Supplies,Q2 2026,510,Vendor B Enterprise,
+Office Supplies,Q2 2026,495,Vendor C Holdings,
+Office Supplies,Q2 2026,520,Vendor D Supplies,
+Office Supplies,Q2 2026,8500,Unusual Vendor Sdn Bhd,Reviewed by: Siti Aminah
+Consulting,Q2 2026,12450,Global Consulting Partners,Contact: procurement@globalconsulting.com
+Consulting,Q2 2026,12450,Global Consulting Partners,Contact: procurement@globalconsulting.com
+Rent,Q1 2026,10000,Landlord Holdings Sdn Bhd,
+Rent,Q2 2026,10200,Landlord Holdings Sdn Bhd,
+Utilities,Q1 2026,1500,PowerCo Malaysia,
+Utilities,Q2 2026,1620,PowerCo Malaysia,
+Travel,Q2 2026,3200,Regional Travel Agency,Employee: Tan Wei Ling IC: 990101-14-5566
+Payroll Processing,Q2 2026,890,HR Systems Sdn Bhd,Prepared by: Nurul Izzah
