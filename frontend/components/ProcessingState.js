@@ -11,8 +11,6 @@ export default function ProcessingState() {
   const [stepIndex, setStepIndex] = useState(0);
 
   useEffect(() => {
-    // Purely cosmetic pacing — the real work happens server-side; this
-    // just gives the user a sense of progress rather than a static spinner.
     const interval = setInterval(() => {
       setStepIndex((i) => Math.min(i + 1, STEPS.length - 1));
     }, 900);
@@ -23,19 +21,17 @@ export default function ProcessingState() {
     <div
       role="status"
       aria-live="polite"
+      className="card-elevated"
       style={{
-        border: "1px solid var(--color-border)",
-        borderRadius: "var(--radius-lg)",
-        background: "var(--color-surface)",
-        padding: "48px 32px",
+        padding: "56px 32px",
         textAlign: "center",
       }}
     >
       <div
         style={{
-          width: 28,
-          height: 28,
-          margin: "0 auto 20px",
+          width: 30,
+          height: 30,
+          margin: "0 auto 22px",
           border: "3px solid var(--color-accent-soft)",
           borderTopColor: "var(--color-accent)",
           borderRadius: "50%",
@@ -44,8 +40,25 @@ export default function ProcessingState() {
       />
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
 
-      <p style={{ margin: "0 0 4px", fontWeight: 600, fontSize: 16 }}>{STEPS[stepIndex]}</p>
-      <p style={{ margin: 0, color: "var(--color-ink-muted)", fontSize: 13 }}>
+      <div style={{ display: "flex", justifyContent: "center", gap: 6, marginBottom: 18 }} aria-hidden="true">
+        {STEPS.map((_, i) => (
+          <span
+            key={i}
+            style={{
+              width: 6,
+              height: 6,
+              borderRadius: "50%",
+              background: i <= stepIndex ? "var(--color-accent)" : "var(--color-border-strong)",
+              transition: "background 200ms var(--ease)",
+            }}
+          />
+        ))}
+      </div>
+
+      <p className="text-heading" style={{ margin: "0 0 6px", fontSize: "1.0625rem" }}>
+        {STEPS[stepIndex]}
+      </p>
+      <p className="text-small" style={{ margin: 0 }}>
         This usually takes a few seconds
       </p>
     </div>

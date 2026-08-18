@@ -29,99 +29,107 @@ export default function InsightCard({ insight, rowsById }) {
     .filter(Boolean);
 
   return (
-    <div
-      style={{
-        border: "1px solid var(--color-border)",
-        borderRadius: "var(--radius-md)",
-        background: "var(--color-surface)",
-        padding: "16px 18px",
-        marginBottom: 10,
-      }}
-    >
-      <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-        <span
+    <div className="card" style={{ padding: "18px 20px", marginBottom: 10 }}>
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+        {/* Severity indicator as a solid-colored bar rather than a pill —
+            reads like a document annotation/flag, distinct from the
+            masking badge's pill shape so the two systems never blend */}
+        <div
+          aria-hidden="true"
           style={{
+            width: 3,
+            alignSelf: "stretch",
+            borderRadius: 2,
+            background: severity.color,
             flexShrink: 0,
-            background: severity.bg,
-            color: severity.color,
-            fontSize: 11,
-            fontWeight: 700,
-            textTransform: "uppercase",
-            letterSpacing: "0.03em",
-            padding: "3px 8px",
-            borderRadius: 999,
-            marginTop: 2,
           }}
-        >
-          {severity.label}
-        </span>
+        />
 
         <div style={{ flex: 1 }}>
-          <p style={{ margin: 0, fontSize: 14.5, lineHeight: 1.45 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
             <span
-              style={{
-                fontSize: 11,
-                fontWeight: 700,
-                color: "var(--color-ink-muted)",
-                textTransform: "uppercase",
-                marginRight: 8,
-              }}
+              className="badge-dot"
+              style={{ background: severity.bg, color: severity.color }}
             >
-              {TYPE_LABELS[insight.type] || insight.type}
+              {severity.label}
             </span>
+            <span className="text-micro">{TYPE_LABELS[insight.type] || insight.type}</span>
+          </div>
+
+          <p className="text-body" style={{ margin: 0 }}>
             {insight.message}
           </p>
 
           {sourceRows.length > 0 && (
             <button
               onClick={() => setExpanded((v) => !v)}
+              className="text-small"
               style={{
-                marginTop: 8,
+                marginTop: 10,
                 background: "none",
                 border: "none",
                 padding: 0,
                 color: "var(--color-accent)",
-                fontSize: 13,
                 fontWeight: 600,
                 cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 5,
               }}
             >
-              {expanded ? "Hide source data ▲" : `Show source data (${sourceRows.length} row${sourceRows.length === 1 ? "" : "s"}) ▼`}
+              {expanded ? "Hide source data" : `Show source data (${sourceRows.length} row${sourceRows.length === 1 ? "" : "s"})`}
+              <span
+                aria-hidden="true"
+                style={{
+                  display: "inline-block",
+                  fontSize: 10,
+                  transition: "transform 160ms var(--ease)",
+                  transform: expanded ? "rotate(180deg)" : "none",
+                }}
+              >
+                ▼
+              </span>
             </button>
           )}
 
           {expanded && sourceRows.length > 0 && (
-            <div
-              className="tabular"
-              style={{
-                marginTop: 10,
-                background: "var(--color-paper)",
-                borderRadius: "var(--radius-sm)",
-                padding: "10px 12px",
-                fontSize: 12.5,
-                overflowX: "auto",
-              }}
-            >
-              {sourceRows.map((row) => (
-                <div
-                  key={row.id}
-                  style={{
-                    display: "flex",
-                    gap: 16,
-                    padding: "4px 0",
-                    borderBottom: "1px solid var(--color-border)",
-                  }}
-                >
-                  {Object.entries(row)
-                    .filter(([k]) => k !== "id")
-                    .map(([k, v]) => (
-                      <span key={k}>
-                        <span style={{ color: "var(--color-ink-muted)" }}>{k}: </span>
-                        {String(v)}
-                      </span>
-                    ))}
-                </div>
-              ))}
+            <div style={{ marginTop: 12, display: "flex", gap: 10 }}>
+              {/* Visual connector — a thin bracket tying the insight to
+                  its source rows, so the drill-down reads as "here's the
+                  evidence" rather than an unrelated list appearing below */}
+              <div
+                aria-hidden="true"
+                style={{
+                  width: 2,
+                  background: "var(--color-border-strong)",
+                  borderRadius: 1,
+                  flexShrink: 0,
+                }}
+              />
+              <div
+                className="text-figure"
+                style={{
+                  flex: 1,
+                  background: "var(--color-surface-sunken)",
+                  borderRadius: "var(--radius-sm)",
+                  padding: "10px 12px",
+                  fontSize: 12.5,
+                  overflowX: "auto",
+                }}
+              >
+                {sourceRows.map((row) => (
+                  <div key={row.id} className="divider-row" style={{ display: "flex", gap: 16, padding: "5px 0" }}>
+                    {Object.entries(row)
+                      .filter(([k]) => k !== "id")
+                      .map(([k, v]) => (
+                        <span key={k}>
+                          <span style={{ color: "var(--color-ink-faint)" }}>{k}: </span>
+                          {String(v)}
+                        </span>
+                      ))}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>

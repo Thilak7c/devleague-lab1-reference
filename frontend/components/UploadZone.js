@@ -77,14 +77,16 @@ export default function UploadZone({ onFileSelected, status }) {
         }}
         onDragLeave={() => setIsDragging(false)}
         onDrop={!isBusy ? handleDrop : undefined}
+        className={isDragging ? "card-elevated" : "card"}
         style={{
-          border: `2px dashed ${isDragging ? "var(--color-accent)" : "var(--color-border)"}`,
-          borderRadius: "var(--radius-lg)",
+          borderStyle: "dashed",
+          borderWidth: 2,
+          borderColor: isDragging ? "var(--color-accent)" : "var(--color-border)",
           background: isDragging ? "var(--color-accent-soft)" : "var(--color-surface)",
-          padding: "56px 32px",
+          padding: "64px 32px",
           textAlign: "center",
           cursor: isBusy ? "default" : "pointer",
-          transition: "border-color 120ms ease, background 120ms ease",
+          transition: "border-color 160ms var(--ease), background 160ms var(--ease), box-shadow 160ms var(--ease)",
           opacity: isBusy ? 0.6 : 1,
         }}
       >
@@ -97,13 +99,26 @@ export default function UploadZone({ onFileSelected, status }) {
           disabled={isBusy}
         />
 
-        <div style={{ fontSize: 32, marginBottom: 12 }} aria-hidden="true">
+        <div
+          aria-hidden="true"
+          style={{
+            width: 52,
+            height: 52,
+            margin: "0 auto 18px",
+            borderRadius: "var(--radius-lg)",
+            background: "var(--color-accent-soft)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 22,
+          }}
+        >
           📄
         </div>
-        <p style={{ margin: "0 0 4px", fontWeight: 600, fontSize: 16 }}>
+        <p className="text-heading" style={{ margin: "0 0 6px" }}>
           {isBusy ? "Uploading…" : "Drop a financial report here"}
         </p>
-        <p style={{ margin: 0, color: "var(--color-ink-muted)", fontSize: 14 }}>
+        <p className="text-small" style={{ margin: 0 }}>
           {isBusy ? "Please wait" : "or click to browse — PDF, CSV, or XLSX, up to 10MB"}
         </p>
       </div>
@@ -111,13 +126,13 @@ export default function UploadZone({ onFileSelected, status }) {
       {validationError && (
         <p
           role="alert"
+          className="text-small"
           style={{
             marginTop: 12,
             padding: "10px 14px",
             background: "var(--color-high-soft)",
             color: "var(--color-high)",
             borderRadius: "var(--radius-sm)",
-            fontSize: 14,
           }}
         >
           {validationError}

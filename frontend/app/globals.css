@@ -1,38 +1,63 @@
 :root {
   /* Base */
-  --color-paper: #FAFAF9;
+  --color-paper: #F7F7F9;
   --color-surface: #FFFFFF;
-  --color-ink: #1C1D21;
-  --color-ink-muted: #5B5D66;
-  --color-border: #E5E4E1;
+  --color-surface-sunken: #F1F2F5;
+  --color-ink: #16181D;
+  --color-ink-muted: #6B7280;
+  --color-ink-faint: #9CA3AF;
+  --color-border: #E7E8EC;
+  --color-border-strong: #D6D8DE;
 
-  /* Brand accent — indigo, carried over from the practice build's redesign */
-  --color-accent: #4F46E5;
-  --color-accent-soft: #EEF0FD;
-  --color-accent-ink: #372FB8;
+  /* Brand accent — clean saturated blue, used ONLY for interactive elements */
+  --color-accent: #4F6EF7;
+  --color-accent-hover: #3D5BE0;
+  --color-accent-active: #3249C4;
+  --color-accent-soft: #EBEFFE;
+  --color-accent-ink: #3D5BE0;
 
-  /* Severity — deliberately distinct from the brand accent so insight
-     priority is never confused with UI chrome */
-  --color-high: #DC2626;
-  --color-high-soft: #FEF2F2;
-  --color-warning: #D97706;
-  --color-warning-soft: #FFFBEB;
-  --color-info: #64748B;
-  --color-info-soft: #F1F5F9;
-  --color-success: #16A34A;
-  --color-success-soft: #F0FDF4;
+  /* Severity — kept functionally distinct from the accent blue */
+  --color-high: #E0553F;
+  --color-high-soft: #FCEBE8;
+  --color-warning: #E0932E;
+  --color-warning-soft: #FDF3E4;
+  --color-info: #6B7280;
+  --color-info-soft: #F1F2F5;
+  --color-success: #2FA36B;
+  --color-success-soft: #E7F7EF;
+  --color-masking: #6B7280;
+  --color-masking-soft: #F1F2F5;
 
   /* Type */
-  --font-display: "Fraunces", Georgia, serif;
+  --font-display: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
   --font-body: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: "IBM Plex Mono", "SF Mono", Menlo, monospace;
 
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
+  --text-hero: 2.75rem;
+  --text-heading: 1.1875rem;
+  --text-body: 0.9375rem;
+  --text-small: 0.8125rem;
+  --text-micro: 0.6875rem;
 
-  --shadow-card: 0 1px 2px rgba(28, 29, 33, 0.04), 0 4px 12px rgba(28, 29, 33, 0.06);
-  --shadow-card-hover: 0 2px 4px rgba(28, 29, 33, 0.06), 0 8px 24px rgba(28, 29, 33, 0.10);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-pill: 999px;
+
+  --shadow-xs: 0 1px 2px rgba(22, 24, 29, 0.04);
+  --shadow-sm: 0 1px 2px rgba(22, 24, 29, 0.04), 0 2px 6px rgba(22, 24, 29, 0.04);
+  --shadow-md: 0 2px 4px rgba(22, 24, 29, 0.04), 0 8px 20px rgba(22, 24, 29, 0.06);
+  --shadow-lg: 0 4px 10px rgba(22, 24, 29, 0.05), 0 16px 36px rgba(22, 24, 29, 0.08);
+  --shadow-focus: 0 0 0 3px rgba(79, 110, 247, 0.18);
+
+  --space-xs: 6px;
+  --space-sm: 10px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 40px;
+
+  --ease: cubic-bezier(0.2, 0.65, 0.3, 1);
 }
 
 * {
@@ -46,8 +71,9 @@ html, body {
   color: var(--color-ink);
   font-family: var(--font-body);
   font-size: 15px;
-  line-height: 1.5;
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 button {
@@ -58,21 +84,864 @@ a {
   color: var(--color-accent);
 }
 
-/* Numeric/tabular data always in mono — reinforces the "ledger" feel and
-   makes columns of amounts genuinely easier to scan and compare */
 .tabular {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: var(--shadow-focus);
+  border-radius: var(--radius-sm);
 }
 
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* ================= Type scale ================= */
+
+.text-hero {
+  font-family: var(--font-display);
+  font-size: var(--text-hero);
+  font-weight: 650;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+}
+
+.text-heading {
+  font-family: var(--font-display);
+  font-size: var(--text-heading);
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+}
+
+.text-body {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: 1.55;
+  color: var(--color-ink);
+}
+
+.text-small {
+  font-family: var(--font-body);
+  font-size: var(--text-small);
+  line-height: 1.4;
+  color: var(--color-ink-muted);
+}
+
+.text-micro {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-ink-faint);
+}
+
+.text-figure {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* ================= Primitives ================= */
+
+/* Cards: the one true "raised surface" pattern — replaces ad hoc
+   border+shadow inline styles scattered per component */
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.card-elevated {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: var(--text-small);
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background 120ms var(--ease), border-color 120ms var(--ease),
+    box-shadow 120ms var(--ease), transform 120ms var(--ease);
+}
+.btn:active {
+  transform: translateY(0.5px);
+}
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-primary {
+  background: var(--color-accent);
+  color: #fff;
+  box-shadow: 0 1px 2px rgba(67, 56, 202, 0.15), 0 4px 10px rgba(67, 56, 202, 0.18);
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+  box-shadow: 0 1px 2px rgba(67, 56, 202, 0.18), 0 6px 16px rgba(67, 56, 202, 0.24);
+}
+
+.btn-secondary {
+  background: var(--color-surface);
+  color: var(--color-ink);
+  border-color: var(--color-border-strong);
+}
+.btn-secondary:hover:not(:disabled) {
+  background: var(--color-surface-sunken);
+  border-color: var(--color-border-strong);
+}
+
+.btn-text {
+  background: transparent;
+  color: var(--color-ink-muted);
+  padding: 8px 10px;
+  box-shadow: none;
+}
+.btn-text:hover:not(:disabled) {
+  background: var(--color-surface-sunken);
+  color: var(--color-ink);
+}
+
+/* Badges — one shape, tinted per semantic color via inline style/var,
+   not per-component ad hoc pill markup */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-small);
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+  padding: 5px 12px;
+  line-height: 1.3;
+}
+
+.badge-dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: var(--text-micro);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  border-radius: var(--radius-sm);
+  padding: 3px 8px;
+}
+
+/* Callout — the "notice" surface used by PrivacyNotice / VisionDisclosure */
+.callout {
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  font-size: var(--text-small);
+  line-height: 1.55;
+  border: 1px solid transparent;
+}
+
+/* Divider, for ledger-style row lists (Step 4 later) */
+.divider-row {
+  border-bottom: 1px solid var(--color-border);
+}
+.divider-row:last-child {
+  border-bottom: none;
+}
+
+/* ================= Motion ================= */
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Applied to the headline results card and hero states on mount */
+.anim-fade-up {
+  animation: fade-up 420ms var(--ease) both;
+}
+
+/* Applied per-insight-card; combine with an inline animation-delay for stagger */
+.anim-stagger {
+  animation: fade-up 380ms var(--ease) both;
+}
+
+.anim-scale-in {
+  animation: scale-in 260ms var(--ease) both;
+}
+
+/* Smooth expand/collapse for drill-downs and dropdown content.
+   Requires the element's max-height to be toggled between 0 and a value
+   large enough to fit the content (set inline per use, see InsightCard). */
+.collapse {
+  overflow: hidden;
+  transition: max-height 260ms var(--ease), opacity 200ms var(--ease);
+}
+
+/* Hover lift for interactive cards (dropzone, results card) */
+.hover-lift {
+  transition: transform 180ms var(--ease), box-shadow 180ms var(--ease);
+}
+.hover-lift:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-fade-up,
+  .anim-stagger,
+  .anim-scale-in {
+    animation: none !important;
+  }
+  .collapse,
+  .hover-lift {
+    transition: none !important;
+  }
+}
+
+/* ================= Stat cards (QRFlow-style summary row) ================= */
+
+.stat-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 180ms var(--ease), transform 180ms var(--ease);
+}
+.stat-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.stat-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.stat-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  flex-shrink: 0;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+/* ================= Modal ================= */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 17, 21, 0.45);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 100;
+  animation: fade-in 160ms var(--ease) both;
+}
+
+.modal-panel {
+  background: var(--color-surface);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 640px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.modal-close {
+  background: var(--color-surface-sunken);
+  border: none;
+  border-radius: var(--radius-sm);
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--color-ink-muted);
+  flex-shrink: 0;
+  font-size: 12px;
+  transition: background 120ms var(--ease), color 120ms var(--ease);
+}
+.modal-close:hover {
+  background: var(--color-border);
+  color: var(--color-ink);
+}
+
+.modal-body {
+  padding: 4px 24px 24px;
+  overflow-y: auto;
+}
+
+/* ================= Data table ================= */
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.data-table th {
+  text-align: left;
+  padding: 8px;
+  border-bottom: 1px solid var(--color-border);
+}
+.data-table td {
+  padding: 12px 8px;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: top;
+}
+.data-table tr:last-child > td {
+  border-bottom: none;
+}
+.table-row-clickable {
+  cursor: pointer;
+  transition: background 120ms var(--ease);
+}
+.table-row-clickable:hover {
+  background: var(--color-surface-sunken);
+}
+
+/* Stat cards are now real buttons — reset default button chrome */
+.stat-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 180ms var(--ease), transform 180ms var(--ease), border-color 180ms var(--ease);
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  width: 100%;
+}
+.stat-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+  border-color: var(--color-border-strong);
+}
+.stat-card:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus), var(--shadow-md);
+}
+
+/* ================= Top bar ================= */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 32px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-mark {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: var(--color-accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.brand-name {
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+}
+
+.brand-sub {
+  font-size: 12px;
+  color: var(--color-ink-faint);
+  margin-left: 2px;
+}
+
+.topbar-page {
+  display: none;
+}
+
+@media (min-width: 720px) {
+  .topbar-page {
+    display: block;
+    font-size: 13px;
+    color: var(--color-ink-muted);
+    padding-left: 16px;
+    border-left: 1px solid var(--color-border);
+  }
+}
+
+.page-shell {
+  min-height: 100vh;
+  background: var(--color-paper);
+}
+
+/* ================= App shell (sidebar layout) ================= */
+
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.app-sidebar {
+  width: 264px;
+  flex-shrink: 0;
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.app-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+/* Step tracker */
+.step-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 6px;
+  border-radius: var(--radius-sm);
+}
+
+.step-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+  border: 1.5px solid var(--color-border-strong);
+  color: var(--color-ink-faint);
+  background: var(--color-surface);
+}
+.step-dot.complete {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+.step-dot.active {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.step-line {
+  width: 1.5px;
+  height: 16px;
+  background: var(--color-border-strong);
+  margin-left: 15.5px;
+}
+.step-line.complete {
+  background: var(--color-accent);
+}
+
+/* Trust facts list */
+.trust-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.trust-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+@media (max-width: 880px) {
+  .app-shell {
+    flex-direction: column;
+  }
+  .app-sidebar {
+    width: 100%;
+    height: auto;
+    position: sticky;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .sidebar-section {
+    display: none;
+  }
+}
+
+/* ================= App shell (sidebar + header) ================= */
+
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.app-sidebar {
+  width: 264px;
+  flex-shrink: 0;
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.app-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+/* Step tracker */
+.step-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 6px;
+  border-radius: var(--radius-sm);
+}
+
+.step-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+  border: 1.5px solid var(--color-border-strong);
+  color: var(--color-ink-faint);
+  background: var(--color-surface);
+}
+.step-dot.complete {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+.step-dot.active {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.step-line {
+  width: 1.5px;
+  height: 16px;
+  background: var(--color-border-strong);
+  margin-left: 15.5px;
+}
+.step-line.complete {
+  background: var(--color-accent);
+}
+
+/* Trust facts list */
+.trust-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.trust-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+@media (max-width: 880px) {
+  .app-shell {
+    flex-direction: column;
+  }
+  .app-sidebar {
+    width: 100%;
+    height: auto;
+    position: static;
+    padding: 14px 20px;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .sidebar-section {
+    display: none;
+  }
+}
+
+/* ================= Step tracker (horizontal, top of card) ================= */
+
+.step-track {
+  display: flex;
+  align-items: center;
+  margin-bottom: 28px;
+}
+.step-track-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.step-track-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  border: 1.5px solid var(--color-border-strong);
+  color: var(--color-ink-faint);
+  background: var(--color-surface);
+  flex-shrink: 0;
+  transition: background 240ms var(--ease), border-color 240ms var(--ease), color 240ms var(--ease), transform 240ms var(--ease);
+}
+.step-track-dot.complete {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+.step-track-dot.active {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  box-shadow: 0 0 0 4px var(--color-accent-soft);
+  transform: scale(1.08);
+}
+.step-track-label {
+  font-size: 12.5px;
+  color: var(--color-ink-faint);
+  white-space: nowrap;
+}
+.step-track-label.active {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+.step-track-connector {
+  flex: 1;
+  height: 1.5px;
+  background: var(--color-border-strong);
+  margin: 0 10px;
+  position: relative;
+  overflow: hidden;
+}
+.step-track-connector-fill {
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  width: 0%;
+  background: var(--color-accent);
+  transition: width 420ms var(--ease);
+}
+.step-track-connector-fill.complete {
+  width: 100%;
+}
+
+/* ================= Staged file card ================= */
+
+.staged-file-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-lg);
+  background: var(--color-accent-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+/* ================= Toast ================= */
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translate(-50%, -12px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+@keyframes toast-out {
+  from { opacity: 1; transform: translate(-50%, 0); }
+  to { opacity: 0; transform: translate(-50%, -12px); }
+}
+.toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--color-ink);
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  font-size: 13.5px;
+  font-weight: 600;
+  animation: toast-in 260ms var(--ease) both;
+}
+.toast.leaving {
+  animation: toast-out 220ms var(--ease) both;
+}
+.toast-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-success);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+/* ================= Confetti overlay ================= */
+
+.confetti-canvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 150;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .step-track-dot,
+  .step-track-connector-fill {
+    transition: none !important;
+  }
+  .toast {
+    animation: none !important;
   }
 }

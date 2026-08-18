@@ -8,20 +8,18 @@ export default function VisionDisclosure({ extractionMethod }) {
 
   return (
     <div
+      className="callout"
       style={{
         background: "var(--color-accent-soft)",
-        border: "1px solid var(--color-accent-soft)",
-        borderRadius: "var(--radius-md)",
-        padding: "10px 16px",
-        marginBottom: 16,
-        fontSize: 13.5,
+        borderColor: "var(--color-accent-soft)",
         color: "var(--color-accent-ink)",
+        marginBottom: 16,
       }}
     >
-      <p style={{ margin: 0 }}>
-        🤖 This document was processed using AI-assisted image reading, since it appears to be a
-        scanned document without extractable text. Data accuracy may vary slightly compared to
-        text-based documents.
+      <p className="text-small" style={{ margin: 0, color: "inherit" }}>
+        <span aria-hidden="true">🤖</span> This document was processed using AI-assisted image
+        reading, since it appears to be a scanned document without extractable text. Data accuracy
+        may vary slightly compared to text-based documents.
       </p>
     </div>
   );

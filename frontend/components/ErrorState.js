@@ -8,44 +8,47 @@ export default function ErrorState({ code, message, onRetry, onUseDemoMode }) {
   return (
     <div
       role="alert"
+      className="card-elevated"
       style={{
-        border: "1px solid var(--color-border)",
-        borderRadius: "var(--radius-lg)",
-        background: "var(--color-surface)",
-        padding: "40px 32px",
+        padding: "48px 32px",
         textAlign: "center",
       }}
     >
-      <div style={{ fontSize: 28, marginBottom: 12 }} aria-hidden="true">
+      <div
+        aria-hidden="true"
+        style={{
+          width: 52,
+          height: 52,
+          margin: "0 auto 18px",
+          borderRadius: "var(--radius-lg)",
+          background: "var(--color-high-soft)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 22,
+        }}
+      >
         ⚠️
       </div>
-      <p style={{ margin: "0 0 6px", fontWeight: 600, fontSize: 16 }}>
+      <p className="text-heading" style={{ margin: "0 0 6px" }}>
         {isNetworkIssue ? "Couldn't reach the server" : "Couldn't process this document"}
       </p>
-      <p style={{ margin: "0 0 24px", color: "var(--color-ink-muted)", fontSize: 14, maxWidth: 420, marginInline: "auto" }}>
+      <p
+        className="text-small"
+        style={{ margin: "0 0 22px", maxWidth: 420, marginInline: "auto" }}
+      >
         {friendlyErrorMessage(code, message)}
       </p>
 
       {/* Reinforces the no-persistence PDPA story even in the failure path
           — per PDPA_UI_Copy.md Section 5, a user shouldn't have to wonder
           whether a failed upload left something behind. */}
-      <p style={{ margin: "0 0 24px", fontSize: 12, color: "var(--color-ink-muted)" }}>
+      <p className="text-micro" style={{ margin: "0 0 24px", letterSpacing: "0.02em" }}>
         No data from this file has been stored.
       </p>
 
-      <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
-        <button
-          onClick={onRetry}
-          style={{
-            padding: "10px 20px",
-            borderRadius: "var(--radius-md)",
-            border: "1px solid var(--color-border)",
-            background: "var(--color-surface)",
-            fontWeight: 600,
-            fontSize: 14,
-            cursor: "pointer",
-          }}
-        >
+      <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
+        <button onClick={onRetry} className="btn btn-secondary">
           Try again
         </button>
 
@@ -53,19 +56,7 @@ export default function ErrorState({ code, message, onRetry, onUseDemoMode }) {
             if the live call fails (e.g. venue wifi during judging), offer a
             path that doesn't leave the presenter stuck on an error screen. */}
         {isNetworkIssue && onUseDemoMode && (
-          <button
-            onClick={onUseDemoMode}
-            style={{
-              padding: "10px 20px",
-              borderRadius: "var(--radius-md)",
-              border: "none",
-              background: "var(--color-accent)",
-              color: "white",
-              fontWeight: 600,
-              fontSize: 14,
-              cursor: "pointer",
-            }}
-          >
+          <button onClick={onUseDemoMode} className="btn btn-primary">
             View Demo Mode
           </button>
         )}
