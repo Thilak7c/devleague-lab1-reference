@@ -1,7 +1,7 @@
 {
-  "name": "financial-report-analysis-backend",
+  "name": "rentap-ai-backend",
   "version": "1.0.0",
-  "description": "Backend for DevLeague Lab 1 - AI-Powered Financial Report Analysis",
+  "description": "Backend for Rentap AI — DevLeague Lab 1 AI-Powered Financial Report Analysis",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

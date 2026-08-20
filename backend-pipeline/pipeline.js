@@ -1,3 +1,5 @@
+// backend-pipeline/pipeline.js
+
 /**
  * Pipeline orchestrator
  * ---------------------------------
@@ -20,6 +22,19 @@
  * pure function of (buffer, fileType) -> response object, so it can be
  * unit-tested without spinning up a server, and reused if the transport
  * layer changes.
+ *
+ * PROGRESS REPORTING (added for job-status polling):
+ * processDocument now accepts an optional `onProgress(stage)` callback.
+ * `stage` is a short machine-readable string the frontend maps to a
+ * human-readable label (see server.js job-status endpoint). This is
+ * purely additive — omitting onProgress changes no behavior, so existing
+ * callers/tests are unaffected.
+ *
+ * Current stages emitted from THIS file: "parsing", "extracting_vision",
+ * "masking", "analyzing", "done". Finer-grained vision sub-stages (e.g.
+ * "rasterizing", "extracting_page_2_of_4") are emitted by
+ * visionFallback.js once that file is updated to accept/forward the same
+ * onProgress callback — not yet wired as of this change.
  */
 
 const { parseDocument } = require("./documentParser");
@@ -60,12 +75,30 @@ function detectFileType(originalName, mimeType) {
   return null;
 }
 
+// Safe no-op default so every call site below can call onProgress()
+// unconditionally without a null-check at every callsite.
+function noopProgress() {}
+
 /**
  * Main entry point. Takes raw file bytes + metadata, returns the full
  * contract-shaped response object, or throws a PipelineError with a
  * code the caller (Express layer) can map to the right HTTP status.
+ *
+ * @param {Object} args
+ * @param {Buffer} args.buffer
+ * @param {string} args.originalName
+ * @param {string} args.mimeType
+ * @param {number} [args.maxSizeBytes]
+ * @param {(stage: string) => void} [args.onProgress] - optional stage
+ *   reporter for job-status polling. Safe to omit.
  */
-async function processDocument({ buffer, originalName, mimeType, maxSizeBytes = 10 * 1024 * 1024 }) {
+async function processDocument({
+  buffer,
+  originalName,
+  mimeType,
+  maxSizeBytes = 10 * 1024 * 1024,
+  onProgress = noopProgress,
+}) {
   if (buffer.length > maxSizeBytes) {
     throw new PipelineError(
       ErrorCodes.FILE_TOO_LARGE,
@@ -82,6 +115,7 @@ async function processDocument({ buffer, originalName, mimeType, maxSizeBytes = 
   }
 
   // --- Step 1: Extract ---
+  onProgress("parsing");
   let extraction;
   try {
     extraction = await parseDocument(buffer, fileType);
@@ -98,8 +132,12 @@ async function processDocument({ buffer, originalName, mimeType, maxSizeBytes = 
     // error, bad model output), we fail the same honest way the old
     // hard-stop did: a clear EXTRACTION_FAILED, never a misleading blank
     // "0 insights found" result.
+    onProgress("extracting_vision");
     try {
-      const visionResult = await extractViaVision(buffer);
+      // onProgress is forwarded so visionFallback.js can (once updated)
+      // emit finer-grained sub-stages like "rasterizing" or
+      // "extracting_page_2_of_4" through the same callback.
+      const visionResult = await extractViaVision(buffer, { onProgress });
       extraction = {
         rows: visionResult.rows,
         skippedCount: visionResult.skippedCount,
@@ -123,6 +161,7 @@ async function processDocument({ buffer, originalName, mimeType, maxSizeBytes = 
   }
 
   // --- Step 2: Mask PII (before analysis, before response assembly) ---
+  onProgress("masking");
   const { maskedRows, maskedCount: rowMaskedCount, matches: rowMatches } = maskRows(extraction.rows);
 
   // Vision-extracted documents can carry free text that isn't part of any
@@ -145,9 +184,11 @@ async function processDocument({ buffer, originalName, mimeType, maxSizeBytes = 
   // --- Step 3: Analyze (runs on masked rows — amount/category/period
   // fields are untouched by masking since they're not PII, only text
   // fields like vendor/notes are ever modified) ---
+  onProgress("analyzing");
   const analysis = analyzeRows(maskedRows);
 
   // --- Step 4: Assemble response per the locked contract ---
+  onProgress("done");
   return {
     meta: {
       filename: originalName,

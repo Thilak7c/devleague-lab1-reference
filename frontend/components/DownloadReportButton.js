@@ -1,3 +1,5 @@
+// frontend/components/DownloadReportButton.js
+
 "use client";
 
 import { useState } from "react";
@@ -30,8 +32,34 @@ export default function DownloadReportButton({ result }) {
   }
 
   return (
-    <button className="btn btn-primary" onClick={handleDownload} disabled={!result || generating}>
-      {generating ? "Generating…" : "Download PDF Report"}
+    <button
+      className="btn btn-primary"
+      onClick={handleDownload}
+      disabled={!result || generating}
+      style={{ display: "inline-flex", alignItems: "center", gap: 8 }}
+    >
+      {generating ? (
+        "Generating…"
+      ) : (
+        <>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M12 3v12" />
+            <polyline points="7 11 12 16 17 11" />
+            <line x1="4" y1="20" x2="20" y2="20" />
+          </svg>
+          Download PDF Report
+        </>
+      )}
     </button>
   );
 }

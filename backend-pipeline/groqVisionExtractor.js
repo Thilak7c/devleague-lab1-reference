@@ -1,3 +1,5 @@
+// backend-pipeline/groqVisionExtractor.js
+
 /**
  * Groq Vision Extraction
  * ---------------------------------
@@ -21,6 +23,27 @@
  * high-DPI), and reactive retry with backoff on rate-limit responses —
  * see Dev League Hackathon Super Docs.md Section 5 for the source of
  * this pattern.
+ *
+ * PERFORMANCE (changed): extractFromImages() previously processed pages
+ * SEQUENTIALLY (await in a for-loop) — for a multi-page scanned PDF this
+ * meant N full Groq round-trips stacked one after another, which is the
+ * primary cause of the ~2 minute end-to-end time reported for 2-5 page
+ * documents. Pages are now fetched CONCURRENTLY via Promise.all. Existing
+ * per-call retry/backoff (callGroqWithRetry) is untouched and still
+ * handles individual 429s — concurrent calls that hit a rate limit just
+ * retry independently, same as before. Row ordering across pages is
+ * preserved by page index, not by call-completion order.
+ *
+ * SIGNATURE CHANGE: extractFromImages(pageImages, apiKey, fetchImpl) is
+ * now extractFromImages(pageImages, apiKey, options). options may contain
+ * { fetchImpl, onProgress, totalPages }. This was necessary because
+ * visionFallback.js now calls this with an options object for progress
+ * reporting — the old positional fetchImpl arg would have silently broken
+ * (options object passed where fetchImpl was expected). ANY EXISTING TEST
+ * CALLING extractFromImages(pageImages, apiKey, mockFetch) DIRECTLY NEEDS
+ * TO UPDATE TO extractFromImages(pageImages, apiKey, { fetchImpl: mockFetch })
+ * — flagging this so test.js gets fixed alongside this file, not after a
+ * confusing test failure.
  */
 
 const MODEL = "qwen/qwen3.6-27b"; // per Super Docs — same model as the practice build
@@ -190,27 +213,67 @@ function parseModelResponse(rawContent) {
   return { rows, notes };
 }
 
+function noopProgress() {}
+
 /**
  * Full pipeline: takes an array of page image buffers (from
  * pdfRasterize.js), extracts rows from each, combines them.
+ *
+ * Pages are now fetched CONCURRENTLY (Promise.all) instead of
+ * sequentially — see file header for why. Each page still goes through
+ * the same callGroqWithRetry resilience path individually.
+ *
+ * @param {Array} pageImages
+ * @param {string} apiKey
+ * @param {Object} [options]
+ * @param {Function} [options.fetchImpl] - injectable fetch for tests, was
+ *   previously the bare third positional argument.
+ * @param {Function} [options.onProgress] - optional stage reporter.
+ *   Called once with "extracting_pages_started" before any page kicks
+ *   off, then once per page as it completes with
+ *   "extracted_page_<completedCount>_of_<totalPages>".
+ * @param {number} [options.totalPages] - only used to make progress
+ *   labels human-friendly; falls back to pageImages.length if omitted.
  */
-async function extractFromImages(pageImages, apiKey, fetchImpl = fetch) {
+async function extractFromImages(pageImages, apiKey, options = {}) {
+  const { fetchImpl = fetch, onProgress = noopProgress, totalPages = pageImages.length } = options;
+
+  onProgress("extracting_pages_started");
+
+  let completedCount = 0;
+
+  // Kick off every page's Groq call at once rather than awaiting them
+  // one-by-one. Each promise carries its own page index so results can
+  // be reassembled in original page order regardless of which call
+  // finishes first.
+  const pagePromises = pageImages.map((page, index) =>
+    (async () => {
+      const base64 = page.imageBuffer.toString("base64");
+      const rawContent = await callGroqWithRetry(base64, apiKey, fetchImpl);
+      const parsed = parseModelResponse(rawContent);
+      completedCount += 1;
+      onProgress(`extracted_page_${completedCount}_of_${totalPages}`);
+      return { index, ...parsed };
+    })()
+  );
+
+  const pageResults = await Promise.all(pagePromises);
+
+  // Reassemble in original page order (index), not completion order, so
+  // row numbering and notes ordering stay deterministic and match the
+  // document's actual page sequence.
+  pageResults.sort((a, b) => a.index - b.index);
+
   const allRows = [];
   const notesParts = [];
   let rowIdOffset = 0;
 
-  for (const page of pageImages) {
-    const base64 = page.imageBuffer.toString("base64");
-    const rawContent = await callGroqWithRetry(base64, apiKey, fetchImpl);
-    const { rows: pageRows, notes: pageNotes } = parseModelResponse(rawContent);
-
-    // Re-number IDs to stay unique across multiple pages
+  for (const { rows: pageRows, notes: pageNotes } of pageResults) {
     for (const row of pageRows) {
       rowIdOffset += 1;
       row.id = `row_${rowIdOffset}`;
       allRows.push(row);
     }
-
     if (pageNotes && pageNotes.trim()) {
       notesParts.push(pageNotes.trim());
     }

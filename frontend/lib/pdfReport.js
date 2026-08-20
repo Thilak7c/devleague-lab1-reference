@@ -1,3 +1,5 @@
+// lib/pdfReport.js
+
 import { Document, Page, View, Text, StyleSheet } from "@react-pdf/renderer";
 
 const COLORS = {
@@ -113,15 +115,22 @@ const styles = StyleSheet.create({
 
   sourceTable: { backgroundColor: COLORS.surfaceSunken, borderRadius: 4, padding: 8 },
   sourceHeaderText: { fontSize: 7, color: COLORS.inkFaint, marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.3 },
+  // In the styles object, replace sourceRow / sourceCell with:
+
   sourceRow: {
     flexDirection: "row",
+    flexWrap: "wrap",
     fontFamily: "Courier",
     fontSize: 8,
-    paddingVertical: 3,
+    paddingVertical: 6,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
   },
-  sourceCell: { marginRight: 14 },
+  sourceField: {
+    width: "50%",
+    paddingRight: 10,
+    marginBottom: 3,
+  },
   sourceCellLabel: { color: COLORS.inkFaint },
 
   // Generic table (masking log)
@@ -213,10 +222,12 @@ function InsightDetail({ insight, rowsById }) {
               {Object.entries(row)
                 .filter(([k]) => k !== "id")
                 .map(([k, v]) => (
-                  <Text key={k} style={styles.sourceCell}>
-                    <Text style={styles.sourceCellLabel}>{k}: </Text>
-                    {String(v)}
-                  </Text>
+                  <View key={k} style={styles.sourceField}>
+                    <Text>
+                      <Text style={styles.sourceCellLabel}>{k}: </Text>
+                      {String(v)}
+                    </Text>
+                  </View>
                 ))}
             </View>
           ))}
@@ -267,14 +278,14 @@ export default function FinancialReportDocument({ result }) {
 
   return (
     <Document
-      title={`Financial Report Analysis — ${meta.filename}`}
-      author="Financial Report Analysis Tool — DevLeague 2026 Lab 1"
+      title={`Rentap AI Analysis Report — ${meta.filename}`}
+      author="Rentap AI — DevLeague 2026 Lab 1"
     >
       <Page size="A4" style={styles.page}>
         <View style={styles.headerRow}>
           <View style={styles.brandRow}>
-            <Text style={styles.brandMark}>FA</Text>
-            <Text style={styles.brandName}>Financial Report Analysis</Text>
+            <Text style={styles.brandMark}>RA</Text>
+            <Text style={styles.brandName}>Rentap AI</Text>
           </View>
           <Text style={styles.eyebrow}>Lab 1 · DevLeague 2026</Text>
         </View>

@@ -1,8 +1,12 @@
+// frontend/components/ResultsDashboard.js
+
 "use client";
 
 import { useState, Fragment } from "react";
 import VisionDisclosure from "./VisionDisclosure";
 import Modal from "./Modal";
+import DownloadReportButton from "./DownloadReportButton";
+import AnimatedLineChart from "./AnimatedLineChart";
 
 const SEVERITY_META = {
   high: { label: "High severity", icon: "⛔", bg: "var(--color-high-soft)", color: "var(--color-high)", caption: "needs review first" },
@@ -24,12 +28,35 @@ const PII_TYPE_LABELS = {
   NAME: "Labelled Personal Name",
 };
 
-export default function ResultsDashboard({ result, onReset }) {
+// Sorts "Q2 2026"-style period labels chronologically. Unparsed labels
+// sort first rather than throwing, since the contract doesn't hard-lock
+// the period format.
+function periodSortKey(label) {
+  const match = /Q(\d)\s*(\d{4})/.exec(label || "");
+  if (match) return parseInt(match[2], 10) * 10 + parseInt(match[1], 10);
+  return 0;
+}
+
+// Aggregates total `amount` by `period` across all extracted rows, to
+// chart a real trend rather than an unrelated severity-count breakdown.
+function buildPeriodTrend(rows) {
+  const totals = {};
+  rows.forEach((row) => {
+    if (!row.period || typeof row.amount !== "number") return;
+    totals[row.period] = (totals[row.period] || 0) + row.amount;
+  });
+  return Object.entries(totals)
+    .map(([period, amount]) => ({ label: period, value: amount }))
+    .sort((a, b) => periodSortKey(a.label) - periodSortKey(b.label));
+}
+
+export default function ResultsDashboard({ result, showDownload }) {
   const { meta, extracted, privacy, insights, summary, _isDemoMode } = result;
   const rowsById = Object.fromEntries((extracted.rows || []).map((r) => [r.id, r]));
   const [activeModal, setActiveModal] = useState(null); // "high" | "warning" | "info" | "masked" | null
 
   const insightsBySeverity = (sev) => insights.filter((i) => i.severity === sev);
+  const trendData = buildPeriodTrend(extracted.rows || []);
 
   return (
     <div>
@@ -57,13 +84,15 @@ export default function ResultsDashboard({ result, onReset }) {
         </p>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 16, flexWrap: "wrap" }}>
           <h2 className="text-hero" style={{ margin: 0, color: "var(--color-ink)" }}>
-          {summary.totalInsights === 0
-            ? "No anomalies detected"
-            : `${summary.totalInsights} insight${summary.totalInsights === 1 ? "" : "s"} found`}
-        </h2>
-          <button onClick={onReset} className="btn btn-secondary">
-            Analyze another
-          </button>
+            {summary.totalInsights === 0
+              ? "No anomalies detected"
+              : `${summary.totalInsights} insight${summary.totalInsights === 1 ? "" : "s"} found`}
+          </h2>
+          {showDownload && (
+            <div className="anim-scale-in">
+              <DownloadReportButton result={result} />
+            </div>
+          )}
         </div>
       </div>
 
@@ -73,10 +102,10 @@ export default function ResultsDashboard({ result, onReset }) {
           {Object.entries(SEVERITY_META).map(([sev, meta_]) => (
             <button key={sev} className="stat-card" onClick={() => setActiveModal(sev)}>
               <div className="stat-card-top">
-                <span className="text-small" style={{ fontWeight: 600 }}>{meta_.label}</span>
                 <span className="stat-icon" style={{ background: meta_.bg, color: meta_.color }} aria-hidden="true">
                   {meta_.icon}
                 </span>
+                <span className="text-small" style={{ fontWeight: 600 }}>{meta_.label}</span>
               </div>
               <div>
                 <p className="text-figure" style={{ margin: 0, fontSize: "1.75rem", fontWeight: 700, lineHeight: 1, color: "var(--color-ink)" }}>
@@ -89,10 +118,10 @@ export default function ResultsDashboard({ result, onReset }) {
 
           <button className="stat-card" onClick={() => setActiveModal("masked")}>
             <div className="stat-card-top">
-              <span className="text-small" style={{ fontWeight: 600 }}>Fields masked</span>
               <span className="stat-icon" style={{ background: "var(--color-accent-soft)", color: "var(--color-accent-ink)" }} aria-hidden="true">
                 🔒
               </span>
+              <span className="text-small" style={{ fontWeight: 600 }}>Fields masked</span>
             </div>
             <div>
               <p className="text-figure" style={{ margin: 0, fontSize: "1.75rem", fontWeight: 700, lineHeight: 1, color: "var(--color-ink)" }}>
@@ -101,6 +130,29 @@ export default function ResultsDashboard({ result, onReset }) {
               <p className="text-small" style={{ margin: "4px 0 0" }}>PII protected</p>
             </div>
           </button>
+        </div>
+      )}
+
+      {/* Trend chart — real data: total amount by period, not severity counts */}
+      {trendData.length > 1 && (
+        <div className="card" style={{ padding: "20px 24px", marginTop: 20, marginBottom: 20 }}>
+          <p
+            className="text-small"
+            style={{ margin: "0 0 4px", color: "var(--color-ink-faint)", textTransform: "uppercase", letterSpacing: 0.4 }}
+          >
+            Trend
+          </p>
+          <p className="text-heading" style={{ margin: "0 0 16px", fontSize: "1.0625rem" }}>
+            Total amount by period
+          </p>
+          <AnimatedLineChart
+            data={trendData}
+            valueFormatter={(v) => `RM${v.toLocaleString()}`}
+            lineColor="var(--color-accent)"
+          />
+          <p className="text-small" style={{ margin: "16px 0 0", color: "var(--color-ink-muted)" }}>
+            Aggregated from all line items across the document.
+          </p>
         </div>
       )}
 

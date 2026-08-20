@@ -1,3 +1,5 @@
+// backend-pipeline/pdfRasterize.js
+
 /**
  * PDF → Image rasterization
  * ---------------------------------

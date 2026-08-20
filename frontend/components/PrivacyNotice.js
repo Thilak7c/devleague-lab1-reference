@@ -14,13 +14,13 @@ export default function PrivacyNotice() {
         border: "1px solid var(--color-accent-soft)",
         borderRadius: "var(--radius-md)",
         padding: "12px 16px",
-        marginBottom: 20,
+        marginTop: 20,
         fontSize: 13.5,
       }}
     >
       <p style={{ margin: 0, color: "var(--color-accent-ink)" }}>
         🔒 Your document is processed in memory only and is never saved to a database. Personal
-        information (like ID numbers or names) is automatically detected and masked before
+        information is automatically detected and masked before
         anything is shown to you.{" "}
         <button
           onClick={() => setExpanded((v) => !v)}

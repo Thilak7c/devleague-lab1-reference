@@ -1,4 +1,4 @@
-# DevLeague 2026 — Lab 1 Reference Build
+# Rentap AI — DevLeague 2026 Lab 1 Reference Build
 
 **⚠️ This is a reference/prep repo, not the hackathon submission.**
 Everything here was built and tested before Challenge Day so we have a
@@ -14,6 +14,8 @@ before Saturday. Don't push straight from this repo into the submission repo.
 Lab 1 — AI-Powered Financial Report Analysis (Powered by Experian)
 Extract data from PDFs/spreadsheets → detect trends/anomalies →
 present insights on a dashboard, with PDPA-compliant handling.
+
+**Product name:** Rentap AI
 
 ## Architecture
 

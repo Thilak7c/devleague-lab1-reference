@@ -1,3 +1,5 @@
+// frontend/components/StagedFile.js
+
 "use client";
 
 export default function StagedFile({ file, onProceed, onChooseDifferent }) {
@@ -14,12 +16,30 @@ export default function StagedFile({ file, onProceed, onChooseDifferent }) {
       <p className="text-heading" style={{ margin: "0 0 4px" }}>{file.name}</p>
       <p className="text-small" style={{ margin: "0 0 24px" }}>{sizeLabel} · ready to analyze</p>
 
-      <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
-        <button className="btn btn-primary" onClick={onProceed}>
-          Proceed to Analyse File
-        </button>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
         <button className="btn btn-text" onClick={onChooseDifferent}>
           Choose a different file
+        </button>
+        <button
+          className="btn btn-primary"
+          onClick={onProceed}
+          style={{ display: "inline-flex", alignItems: "center", gap: 8 }}
+        >
+          Proceed to Analyse File
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <line x1="5" y1="12" x2="19" y2="12" />
+            <polyline points="12 5 19 12 12 19" />
+          </svg>
         </button>
       </div>
     </div>

@@ -1,8 +1,8 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "Financial Report Analysis — DevLeague Lab 1",
-  description: "AI-powered financial report analysis with explainable insights and PDPA-compliant PII masking.",
+  title: "Rentap AI — Financial Report Analysis (DevLeague Lab 1)",
+  description: "Rentap AI: AI-powered financial report analysis with explainable insights and PDPA-compliant PII masking.",
 };
 
 export default function RootLayout({ children }) {

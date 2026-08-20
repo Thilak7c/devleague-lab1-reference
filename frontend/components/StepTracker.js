@@ -1,3 +1,5 @@
+// frontend/components/StepTracker.js
+
 "use client";
 
 export default function StepTracker({ steps, activeIndex }) {
