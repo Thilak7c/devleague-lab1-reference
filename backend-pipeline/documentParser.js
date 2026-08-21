@@ -24,6 +24,16 @@
  *  - Column name normalization is deliberately forgiving: real reports
  *    won't always say exactly "amount" or "category" — see
  *    normalizeColumnName() for the mapping logic.
+ *
+ * KNOWN LIMITATION (documented, not silently swallowed — see
+ * extractRowsFromText() below): formal statement-style PDFs often wrap a
+ * single row's label across two physical lines (e.g. a long line item
+ * name that breaks before the amount). When that happens, the row is
+ * still captured with the correct amount, but the category text may be
+ * truncated to just the tail of the label (the part on the same line as
+ * the number). This is a real PDF-table-reconstruction problem, not a
+ * regex bug — full fix would need geometry-aware extraction
+ * (x/y positions per text run), which is out of scope for this heuristic.
  */
 
 const Papa = require("papaparse");
@@ -65,13 +75,23 @@ function normalizeColumnName(rawName) {
 // symbols, commas, and whitespace. Returns null (not NaN) if it can't be
 // parsed, so the caller can decide how to handle it explicitly rather than
 // silently propagating NaN through later arithmetic.
+//
+// UPDATED: formal financial statements commonly show negative amounts as
+// parenthesized values, e.g. "(319,720)" instead of "-319,720" (standard
+// accounting notation). Detect that BEFORE stripping non-numeric chars,
+// since the stripping step would otherwise discard the parens and quietly
+// turn a negative figure positive.
 function coerceAmount(rawValue) {
   if (typeof rawValue === "number") return rawValue;
   if (typeof rawValue !== "string") return null;
-  const cleaned = rawValue.replace(/[^0-9.\-]/g, "");
+  const trimmed = rawValue.trim();
+  const isNegativeParens = /^\(.*\)$/.test(trimmed);
+  const cleaned = trimmed.replace(/[^0-9.\-]/g, "");
   if (cleaned === "" || cleaned === "-") return null;
-  const num = Number(cleaned);
-  return Number.isNaN(num) ? null : num;
+  let num = Number(cleaned);
+  if (Number.isNaN(num)) return null;
+  if (isNegativeParens) num = -Math.abs(num);
+  return num;
 }
 
 // ---------------------------------------------------------------------
@@ -169,15 +189,26 @@ async function parsePDF(fileBuffer) {
 }
 
 // Lightweight line-based table guesser: looks for lines that contain a
-// label followed by a currency-like number, which covers the common
-// financial-report pattern of "Category ......... RM12,345.00" or
-// "Category, Period, Amount, Vendor" comma/tab-delimited rows.
+// label followed by a currency-like number.
+//
+// UPDATED: no longer requires the literal "RM" prefix on the number.
+// Many real financial-statement PDFs (esp. formal/regulatory filings)
+// state the currency once as a column header (e.g. "RM'000") and then
+// print bare numbers on every line — "RM" never appears line-by-line.
+// Requiring "RM" per-line meant those documents silently produced zero
+// rows. Instead, a number now qualifies as "amount-like" if it has
+// comma-grouped thousands (e.g. "22,494,498") — this is actually a
+// *better* filter than requiring "RM," since it naturally excludes page
+// numbers, note references ("A23"), and percentages ("13.238%") without
+// needing to special-case them. "RM" is still matched and stripped if
+// present, since some documents do include it inline.
 //
 // This is deliberately simple, not a general PDF-table extractor — good
 // enough for text-based financial statements with one line per entry.
-// A denser/multi-column PDF table may need manual column alignment that
-// this heuristic won't catch; that's a known limitation, not a silent
-// failure (skippedCount reflects lines that didn't match the pattern).
+// A denser/multi-column PDF table, or a label that wraps across two
+// lines before the amount, may not be fully captured — that's a known
+// limitation (see file header), not a silent failure (skippedCount
+// reflects lines that looked number-ish but didn't match cleanly).
 function extractRowsFromText(text) {
   resetRowIdCounter();
   const rows = [];
@@ -185,17 +216,33 @@ function extractRowsFromText(text) {
 
   const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
 
+  // A number that "looks like" a financial amount: optionally wrapped in
+  // parens (negative, accounting notation) or prefixed "RM", with at
+  // least one comma-grouped thousands separator. The comma requirement
+  // is the key qualifying signal now that "RM" is optional.
+  const AMOUNT = String.raw`\(?(?:RM\s?)?\d{1,3}(?:,\d{3})+(?:\.\d+)?\)?`;
+
   // Pattern A: comma or tab-delimited row that looks like
   // "Category, Period, Amount, Vendor" (handles CSV-like text extracted
-  // from a PDF table). \s* after each delimiter handles the common
-  // "comma + space" formatting (e.g. "Marketing, Q1 2026, RM45,000.00") —
-  // without it, a space before "RM" silently breaks the amount match.
-  const delimitedPattern = /^([^,\t]+)[,\t]+\s*([^,\t]+)[,\t]+\s*(RM\s?[\d,]+\.?\d*)[,\t]*\s*(.*)$/i;
+  // from a PDF table).
+  const delimitedPattern = new RegExp(
+    `^([^,\\t]+)[,\\t]+\\s*([^,\\t]+)[,\\t]+\\s*(${AMOUNT})[,\\t]*\\s*(.*)$`,
+    "i"
+  );
 
-  // Pattern B: "Label .... RM amount" single-line entries (dot leaders or
-  // just whitespace before the amount)
-  const labelAmountPattern = /^(.+?)\.{2,}\s*(RM\s?[\d,]+\.?\d*)\s*$/i;
-  const labelAmountPatternSimple = /^([A-Za-z][A-Za-z\s&/-]+?)\s{2,}(RM\s?[\d,]+\.?\d*)\s*$/i;
+  // Pattern B: "Label .... amount" dot-leader style
+  const labelAmountPattern = new RegExp(`^(.+?)\\.{2,}\\s*(${AMOUNT})\\s*$`, "i");
+
+  // Pattern C: "Label   amount [amount2 ...]" whitespace-aligned style —
+  // the common shape for formal statement PDFs (e.g. "TOTAL ASSETS
+  // 348,222,508 341,737,002", current period then prior period). We
+  // take the FIRST number as this row's amount and ignore any trailing
+  // comparative column(s) — capturing prior-period as a separate
+  // dimension would need a real column-alignment pass, out of scope here.
+  const labelAmountPatternSimple = new RegExp(
+    `^([A-Za-z][A-Za-z\\s&/,()'-]*?)\\s{2,}(${AMOUNT})(?:\\s+${AMOUNT})*\\s*$`,
+    "i"
+  );
 
   for (const line of lines) {
     let match = line.match(delimitedPattern);
@@ -227,10 +274,10 @@ function extractRowsFromText(text) {
     }
 
     // Line didn't match either pattern — likely prose/header/footer text,
-    // not a data row. Not counted as "skipped" since most lines in a real
-    // report are prose, not failed data rows; only lines that look
-    // number-ish but didn't parse cleanly are worth flagging.
-    if (/\d/.test(line) && /RM|\$|amount|total/i.test(line)) {
+    // not a data row. Only flag lines that look number-ish (comma-grouped
+    // figure present) but didn't parse cleanly as a real skip, so
+    // skippedCount stays meaningful rather than counting ordinary prose.
+    if (/\d{1,3}(?:,\d{3})+/.test(line)) {
       skippedCount += 1;
     }
   }

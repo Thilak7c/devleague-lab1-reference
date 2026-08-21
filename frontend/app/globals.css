@@ -874,6 +874,28 @@ a {
 .step-track-connector-fill.complete {
   width: 100%;
 }
+@media (max-width: 480px) {
+  .step-track {
+    margin-bottom: 20px;
+  }
+  .step-track-dot {
+    width: 22px;
+    height: 22px;
+    font-size: 10px;
+  }
+  .step-track-item {
+    gap: 6px;
+  }
+  .step-track-label {
+    font-size: 11px;
+  }
+  .step-track-label:not(.active) {
+    display: none;
+  }
+  .step-track-connector {
+    margin: 0 6px;
+  }
+}
 
 /* ================= Staged file card ================= */
 

@@ -16,7 +16,7 @@ export default function StagedFile({ file, onProceed, onChooseDifferent }) {
       <p className="text-heading" style={{ margin: "0 0 4px" }}>{file.name}</p>
       <p className="text-small" style={{ margin: "0 0 24px" }}>{sizeLabel} · ready to analyze</p>
 
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
         <button className="btn btn-text" onClick={onChooseDifferent}>
           Choose a different file
         </button>

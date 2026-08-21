@@ -9,6 +9,18 @@ const VIEW_H = 200;
 const PAD_X = 24;
 const PAD_TOP = 20;
 const PAD_BOTTOM = 32;
+const PAD_BOTTOM_ROTATED = 46; // extra room for angled x-axis labels
+
+// Below this pixel spacing between adjacent points, permanent on-point
+// value labels are dropped (they physically cannot avoid overlapping at
+// this density) — the value is still available via native <title> hover.
+const MIN_LABEL_SPACING = 46;
+const MAX_LABEL_CHARS = 10;
+
+function truncateLabel(label) {
+  if (!label) return "";
+  return label.length > MAX_LABEL_CHARS ? `${label.slice(0, MAX_LABEL_CHARS - 1)}…` : label;
+}
 
 export default function AnimatedLineChart({ data, valueFormatter, lineColor = "var(--color-accent)" }) {
   const [drawn, setDrawn] = useState(false);
@@ -18,8 +30,14 @@ export default function AnimatedLineChart({ data, valueFormatter, lineColor = "v
 
   const max = Math.max(...data.map((d) => d.value), 1);
   const plotW = VIEW_W - PAD_X * 2;
-  const plotH = VIEW_H - PAD_TOP - PAD_BOTTOM;
   const stepX = data.length > 1 ? plotW / (data.length - 1) : 0;
+
+  // Once points are packed tighter than MIN_LABEL_SPACING, rotate the
+  // x-axis labels and drop the permanent value labels — both are pure
+  // legibility responses to density, not data changes.
+  const isCrowded = stepX < MIN_LABEL_SPACING && data.length > 1;
+  const padBottom = isCrowded ? PAD_BOTTOM_ROTATED : PAD_BOTTOM;
+  const plotH = VIEW_H - PAD_TOP - padBottom;
 
   const points = data.map((d, i) => ({
     x: PAD_X + stepX * i,
@@ -104,6 +122,8 @@ export default function AnimatedLineChart({ data, valueFormatter, lineColor = "v
 
         {points.map((p, i) => (
           <g key={p.label}>
+            <title>{`${p.label}: ${valueFormatter ? valueFormatter(p.value) : p.value}`}</title>
+
             <circle
               cx={p.x}
               cy={p.y}
@@ -116,23 +136,36 @@ export default function AnimatedLineChart({ data, valueFormatter, lineColor = "v
                 transitionDelay: `${0.15 + (i / Math.max(points.length - 1, 1)) * 1.0}s`,
               }}
             />
+
+            {/* Permanent value label — only rendered when points have
+                enough breathing room to not collide with their neighbors. */}
+            {!isCrowded && (
+              <text
+                x={p.x}
+                y={p.y - 12}
+                textAnchor="middle"
+                fontSize="11"
+                fontWeight="700"
+                fill="var(--color-ink)"
+                style={{
+                  opacity: drawn ? 1 : 0,
+                  transition: "opacity 0.3s ease",
+                  transitionDelay: `${0.3 + (i / Math.max(points.length - 1, 1)) * 1.0}s`,
+                }}
+              >
+                {valueFormatter ? valueFormatter(p.value) : p.value}
+              </text>
+            )}
+
             <text
               x={p.x}
-              y={p.y - 12}
-              textAnchor="middle"
-              fontSize="11"
-              fontWeight="700"
-              fill="var(--color-ink)"
-              style={{
-                opacity: drawn ? 1 : 0,
-                transition: "opacity 0.3s ease",
-                transitionDelay: `${0.3 + (i / Math.max(points.length - 1, 1)) * 1.0}s`,
-              }}
+              y={VIEW_H - padBottom + (isCrowded ? 14 : 22)}
+              textAnchor={isCrowded ? "end" : "middle"}
+              fontSize="10"
+              fill="var(--color-ink-muted)"
+              transform={isCrowded ? `rotate(-40 ${p.x} ${VIEW_H - padBottom + 14})` : undefined}
             >
-              {valueFormatter ? valueFormatter(p.value) : p.value}
-            </text>
-            <text x={p.x} y={VIEW_H - 10} textAnchor="middle" fontSize="10" fill="var(--color-ink-muted)">
-              {p.label}
+              {truncateLabel(p.label)}
             </text>
           </g>
         ))}
